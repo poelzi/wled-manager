@@ -22,7 +22,7 @@ def saveHost(ip, output, repair = False):
     name = None
     LOG.debug("check %s" % str(ip))
     try:
-        with request.urlopen("http://%s/cfg.json" % str(ip), timeout=5) as cfg:
+        with request.urlopen(f"http://{ip}/cfg.json", timeout=1) as cfg:
             config_json = cfg.read()
             try:
                 cfg = json.loads(config_json)
@@ -38,8 +38,6 @@ def saveHost(ip, output, repair = False):
 
             outPath = os.path.join(output, name)
             os.makedirs(outPath, exist_ok=True)
-            with open(os.path.join(outPath, "cfg.json"), "wb") as fp:
-                fp.write(config_json)
             with open(os.path.join(outPath, "last_ip"), "w") as fp:
                 fp.write(str(ip))
     except (error.URLError, error.HTTPError, socket.timeout) as e:
@@ -47,19 +45,25 @@ def saveHost(ip, output, repair = False):
         return
 
     try:
-        with request.urlopen("http://%s/presets.json" % str(ip), timeout=5) as fp:
-            presets_json = fp.read()
+        with request.urlopen(f"http://{ip}/edit?list=/", timeout=5) as fp:
+            files_json = fp.read()
             try:
-                cfg = json.loads(presets_json)
+                files = json.loads(files_json)
             except (json.JSONDecodeError, UnicodeDecodeError) as e:
-                LOG.info("presets not valid :(")
+                LOG.info("files not valid :(")
                 if repair:
                     repair(ip, name)
             else:
-                with open(os.path.join(outPath, "presets.json"), "wb") as fp:
-                    fp.write(presets_json)
-    except (error.URLError, error.HTTPError) as e:
-        LOG.debug("Error downlading presets.json: %s", e)
+                for file in files:
+                    if file.get("type") == "file":
+                        file_name = file.get("name").lstrip("/")
+                        with request.urlopen(f"http://{ip}/{file_name}", timeout=5) as file_content:
+                            print(os.path.join(outPath, file_name))
+                            with open(os.path.join(outPath, file_name), "wb") as fp:
+                                fp.write(file_content.read())
+    except (error.URLError, error.HTTPError, socket.timeout) as e:
+        LOG.debug("Error downlading files: %s", e)
+        return
 
     if name:
         subprocess.call(["git", "-C", output, "add", name])
@@ -91,6 +95,7 @@ def main():
     for subnet in args.subnets:
         scanSubnet(subnet, args.output)
     subprocess.call(["git", "-C", args.output, "commit", "-m", "wled-backup sync"])
+    subprocess.call(["git", "-C", args.output, "push"])
 
 if __name__ == "__main__":
     main()
