@@ -41,7 +41,7 @@ def saveHost(ip, output, repair = False):
                 fp.write(config_json)
             with open(os.path.join(outPath, "last_ip"), "w") as fp:
                 fp.write(str(ip))
-    except (error.URLError, error.HTTPError) as e:
+    except (error.URLError, error.HTTPError, socket.timeout) as e:
         LOG.debug("IP %s not a WLED node" % ip)
         return
 
