@@ -20,7 +20,7 @@ def repair(ip, name):
 def saveHost(ip, output, repair = False):
     cfg = None
     name = None
-    LOG.debug("check %s" % str(ip))
+    # LOG.debug("check %s" % str(ip))
     try:
         with request.urlopen(f"http://{ip}/cfg.json", timeout=1) as cfg:
             config_json = cfg.read()
