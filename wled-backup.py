@@ -6,6 +6,7 @@ import ipaddress
 import logging
 import json
 import os
+import socket
 from urllib import request, error
 
 logging.basicConfig()
