@@ -94,6 +94,7 @@ def main():
 
     for subnet in args.subnets:
         scanSubnet(subnet, args.output)
+    subprocess.call(["git", "-C", args.output, "pull"])
     subprocess.call(["git", "-C", args.output, "commit", "-m", "wled-backup sync"])
     subprocess.call(["git", "-C", args.output, "push"])
 
