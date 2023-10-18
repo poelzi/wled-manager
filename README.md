@@ -5,11 +5,11 @@ Collection of script to manage WLED devices
 
 ## wled-backup
 
-Downloads all files from WLED devices in a subnet in [CIDR notation](https://www.ipaddressguide.com/cidr) (config and presets), and commits them into a git directory, and pushes changes.
+Downloads all files from WLED devices in a subnet in [CIDR notation](https://www.ipaddressguide.com/cidr) (config and presets) into a folder with `git, pulls, commits, and pushes changes.
 
 Requirements:
- * python
- * git
+ * `python`
+ * `git`
 
 Usage (for a /27 subnet):
 ```bash
